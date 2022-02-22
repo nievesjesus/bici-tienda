@@ -1,9 +1,11 @@
 import './ItemDetailContainer.css';
 
 import { useState, useEffect } from 'react';
-import { getItems } from '../api/index';
 import ItemDetail from './ItemDetail';
 import { useParams } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from "../firebase";
+
 
 export default function ItemDetailContainer() {
   const [item, setItem] = useState();
@@ -13,12 +15,24 @@ export default function ItemDetailContainer() {
   const { productId } = useParams();
 
   useEffect(() => {
-    getItems().then((items) => {
-      const item = items.find((i) => i.id === Number(productId));
-      setItem(item);
-    }).catch((error) => {
-      console.log(error);
-    });
+
+    // Obtengo la referencia del documento, necesita conocer la base de dato, el nombre de la collecion y el id de item
+    const itemRef = doc(db, "items", productId);
+
+    // Le pido a firebase mi documento en base a su referencia
+    getDoc(itemRef)
+    .then((snapshot) => {
+      
+      // Verifico si el item existe
+      if(snapshot.exists()) {
+        // Asigno el item a mi estado
+        setItem({ id: snapshot.id, ...snapshot.data()})
+      }
+
+    })
+    .catch(error => {
+      console.log(error)
+    })
 
   }, [productId]);
 

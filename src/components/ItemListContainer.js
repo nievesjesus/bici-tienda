@@ -5,6 +5,8 @@ import ItemCount from './ItemCount';
 import ItemList from './ItemList';
 import { getItems } from '../api';
 import { useParams } from 'react-router-dom';
+import { getDocs, collection } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function ItemListContainer({ greetings }) {
   const [itemsList, setItemsList] = useState([]);
@@ -28,6 +30,33 @@ export default function ItemListContainer({ greetings }) {
     });
 
   }, [categoryName]);
+
+  useEffect(() => {
+
+    // Referencia a la collecion, debe tener la referencia a la DB y el nombre de la collecion\
+    // collection(db, "items")
+    // Importar getDocs y Collection arriba
+    // import { getDocs, collection } from 'firebase/firestore';
+    // Importar base de datos
+    // import { db } from '../firebase';
+    
+    // 1- La referencia a la collecion
+    const itemsCollection = collection(db, "items");
+
+    // 2- Obtengo mis documentos
+    getDocs(itemsCollection)
+    .then(snapshot => {
+      // doc.data() archivo de Firestore, dame todos tus datos dentro del item
+      //3 -  Mapeo mis productos
+      const products =  snapshot.docs.map( (doc) =>  ({ id: doc.id, ...doc.data() }))
+      console.log(products)
+    })
+    .catch(error => {
+      console.log(error)
+    })
+
+
+  }, []);
 
   function onAddItem(itemCount) {
     console.log(itemCount);

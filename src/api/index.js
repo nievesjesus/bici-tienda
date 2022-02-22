@@ -1,3 +1,7 @@
+import { getDocs, collection } from 'firebase/firestore';
+import { db } from "../firebase";
+
+/* Codigo legacy
 // Esta información en un caso real debería provenir del Backend
 const items = [
   { 
@@ -33,13 +37,44 @@ const items = [
     category: 'bicicletas',
   }
 ]
+  Fin de codigo legacy, puedes borrar esto si quieres
+*/
+
 
 // Función que va a llamar al Backend
 function getItems() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    
+    /*
+      Codigo legacy, para
+      ejemplo
+
+    Codigo viejo sin firebase
     setTimeout(() => {
       resolve(items);
     }, 500)
+
+      Fin de codigo legacy, puedes borrar esto si quieres
+    */
+
+    // 1 - La referencia a la collecion    
+    const itemsCollection = collection(db, "items");
+
+    // 2 - Obtengo mis documentos
+    getDocs(itemsCollection)
+    .then(snapshot => {      
+      // doc.data() archivo de Firestore, dame todos tus datos dentro del item
+      // 3 -  Mapeo mis productos
+      const products =  snapshot.docs.map( (doc) =>  ({ id: doc.id, ...doc.data() }))
+      
+      // Devolverle a la promesa
+      resolve(products)
+    })
+    .catch(error => {
+      console.log(error)
+      reject(error)
+    })
+
   });
 }
 
